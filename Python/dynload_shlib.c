@@ -66,7 +66,8 @@ _PyImport_FindSharedFuncptr(const char *prefix,
     char pathbuf[260];
     int dlopenflags=0;
 
-    if (strchr(pathname, '/') == NULL) {
+    // Chaquopy disabled: this interferes with our workaround in importer.prepare_dlopen.
+    if (0 && strchr(pathname, '/') == NULL) {
         /* Prefix bare filename with "./" */
         PyOS_snprintf(pathbuf, sizeof(pathbuf), "./%-.255s", pathname);
         pathname = pathbuf;
