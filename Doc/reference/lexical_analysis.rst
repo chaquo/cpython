@@ -376,11 +376,11 @@ characters:
       information on this convention.
 
 ``__*__``
-   System-defined names. These names are defined by the interpreter and its
-   implementation (including the standard library).  Current system names are
-   discussed in the :ref:`specialnames` section and elsewhere.  More will likely
-   be defined in future versions of Python.  *Any* use of ``__*__`` names, in
-   any context, that does not follow explicitly documented use, is subject to
+   System-defined names, informally known as "dunder" names. These names are
+   defined by the interpreter and its implementation (including the standard library).
+   Current system names are discussed in the :ref:`specialnames` section and elsewhere.
+   More will likely be defined in future versions of Python.  *Any* use of ``__*__`` names,
+   in any context, that does not follow explicitly documented use, is subject to
    breakage without warning.
 
 ``__*``
@@ -684,6 +684,11 @@ Replacement expressions can contain line breaks (e.g. in triple-quoted
 strings), but they cannot contain comments.  Each expression is evaluated
 in the context where the formatted string literal appears, in order from
 left to right.
+
+.. versionchanged:: 3.7
+   Prior to Python 3.7, an :keyword:`await` expression and comprehensions
+   containing an :keyword:`async for` clause were illegal in the expressions
+   in formatted string literals due to a problem with the implementation.
 
 If a conversion is specified, the result of evaluating the expression
 is converted before formatting.  Conversion ``'!s'`` calls :func:`str` on

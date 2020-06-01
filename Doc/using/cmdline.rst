@@ -109,8 +109,8 @@ source.
    Many standard library modules contain code that is invoked on their execution
    as a script.  An example is the :mod:`timeit` module::
 
-       python -mtimeit -s 'setup here' 'benchmarked code here'
-       python -mtimeit -h # for details
+       python -m timeit -s 'setup here' 'benchmarked code here'
+       python -m timeit -h # for details
 
    .. audit-event:: cpython.run_module module-name cmdoption-m
 
@@ -935,8 +935,6 @@ conflict.
    default to enabling UTF-8 mode unless explicitly instructed not to do so.
 
    Also available as the :option:`-X` ``utf8`` option.
-
-   .. availability:: \*nix.
 
    .. versionadded:: 3.7
       See :pep:`540` for more details.

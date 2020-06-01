@@ -521,6 +521,12 @@ case $ac_sys_system/$ac_sys_release in
     define_xopen_source=no
     ;;
 
+  # On HP-UX, defining _XOPEN_SOURCE to 600 or greater hides
+  # chroot() and other functions
+  hp*|HP*)
+    define_xopen_source=no
+    ;;
+
 esac
 
 if test $define_xopen_source = yes
@@ -2997,6 +3003,21 @@ AC_ARG_WITH(system_libmpdec,
             [with_system_libmpdec="no"])
 
 AC_MSG_RESULT($with_system_libmpdec)
+
+# Check whether _decimal should use a coroutine-local or thread-local context
+AC_MSG_CHECKING(for --with-decimal-contextvar)
+AC_ARG_WITH(decimal_contextvar,
+            AS_HELP_STRING([--with-decimal-contextvar], [build _decimal module using a coroutine-local rather than a thread-local context (default is yes)]),
+            [],
+            [with_decimal_contextvar="yes"])
+
+if test "$with_decimal_contextvar" != "no"
+then
+    AC_DEFINE(WITH_DECIMAL_CONTEXTVAR, 1,
+      [Define if you want build the _decimal module using a coroutine-local rather than a thread-local context])
+fi
+
+AC_MSG_RESULT($with_decimal_contextvar)
 
 # Check for support for loadable sqlite extensions
 AC_MSG_CHECKING(for --enable-loadable-sqlite-extensions)
