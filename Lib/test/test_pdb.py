@@ -5,6 +5,7 @@ import os
 import pdb
 import sys
 import types
+import codecs
 import unittest
 import subprocess
 import textwrap
@@ -424,6 +425,47 @@ def test_list_commands():
     (Pdb) continue
     """
 
+def test_pdb_whatis_command():
+    """Test the whatis command
+
+    >>> myvar = (1,2)
+    >>> def myfunc():
+    ...     pass
+
+    >>> class MyClass:
+    ...    def mymethod(self):
+    ...        pass
+
+    >>> def test_function():
+    ...   import pdb; pdb.Pdb(nosigint=True, readrc=False).set_trace()
+
+    >>> with PdbTestInput([  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    ...    'whatis myvar',
+    ...    'whatis myfunc',
+    ...    'whatis MyClass',
+    ...    'whatis MyClass()',
+    ...    'whatis MyClass.mymethod',
+    ...    'whatis MyClass().mymethod',
+    ...    'continue',
+    ... ]):
+    ...    test_function()
+    --Return--
+    > <doctest test.test_pdb.test_pdb_whatis_command[3]>(2)test_function()->None
+    -> import pdb; pdb.Pdb(nosigint=True, readrc=False).set_trace()
+    (Pdb) whatis myvar
+    <class 'tuple'>
+    (Pdb) whatis myfunc
+    Function myfunc
+    (Pdb) whatis MyClass
+    Class test.test_pdb.MyClass
+    (Pdb) whatis MyClass()
+    <class 'test.test_pdb.MyClass'>
+    (Pdb) whatis MyClass.mymethod
+    Function mymethod
+    (Pdb) whatis MyClass().mymethod
+    Method mymethod
+    (Pdb) continue
+    """
 
 def test_post_mortem():
     """Test post mortem traceback debugging.
@@ -1226,9 +1268,7 @@ class PdbTestCase(unittest.TestCase):
         return self._run_pdb(['-m', self.module_name], commands)
 
     def _assert_find_function(self, file_content, func_name, expected):
-        file_content = textwrap.dedent(file_content)
-
-        with open(support.TESTFN, 'w') as f:
+        with open(support.TESTFN, 'wb') as f:
             f.write(file_content)
 
         expected = None if not expected else (
@@ -1237,22 +1277,49 @@ class PdbTestCase(unittest.TestCase):
             expected, pdb.find_function(func_name, support.TESTFN))
 
     def test_find_function_empty_file(self):
-        self._assert_find_function('', 'foo', None)
+        self._assert_find_function(b'', 'foo', None)
 
     def test_find_function_found(self):
         self._assert_find_function(
             """\
-            def foo():
-                pass
+def foo():
+    pass
 
-            def bar():
-                pass
+def bœr():
+    pass
 
-            def quux():
-                pass
-            """,
-            'bar',
-            ('bar', 4),
+def quux():
+    pass
+""".encode(),
+            'bœr',
+            ('bœr', 4),
+        )
+
+    def test_find_function_found_with_encoding_cookie(self):
+        self._assert_find_function(
+            """\
+# coding: iso-8859-15
+def foo():
+    pass
+
+def bœr():
+    pass
+
+def quux():
+    pass
+""".encode('iso-8859-15'),
+            'bœr',
+            ('bœr', 5),
+        )
+
+    def test_find_function_found_with_bom(self):
+        self._assert_find_function(
+            codecs.BOM_UTF8 + """\
+def bœr():
+    pass
+""".encode(),
+            'bœr',
+            ('bœr', 1),
         )
 
     def test_issue7964(self):

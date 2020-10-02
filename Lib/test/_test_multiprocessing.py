@@ -31,7 +31,7 @@ from test import support
 # Skip tests if _multiprocessing wasn't built.
 _multiprocessing = test.support.import_module('_multiprocessing')
 # Skip tests if sem_open implementation is broken.
-test.support.import_module('multiprocessing.synchronize')
+support.skip_if_broken_multiprocessing_synchronize()
 import threading
 
 import multiprocessing.connection
@@ -3827,6 +3827,18 @@ class _TestSharedMemory(BaseTestCase):
 
         sms.close()
 
+        # Test creating a shared memory segment with negative size
+        with self.assertRaises(ValueError):
+            sms_invalid = shared_memory.SharedMemory(create=True, size=-1)
+
+        # Test creating a shared memory segment with size 0
+        with self.assertRaises(ValueError):
+            sms_invalid = shared_memory.SharedMemory(create=True, size=0)
+
+        # Test creating a shared memory segment without size argument
+        with self.assertRaises(ValueError):
+            sms_invalid = shared_memory.SharedMemory(create=True)
+
     def test_shared_memory_across_processes(self):
         # bpo-40135: don't define shared memory block's name in case of
         # the failure when we run multiprocessing tests in parallel.
@@ -4222,7 +4234,7 @@ class _TestImportStar(unittest.TestCase):
     def get_module_names(self):
         import glob
         folder = os.path.dirname(multiprocessing.__file__)
-        pattern = os.path.join(folder, '*.py')
+        pattern = os.path.join(glob.escape(folder), '*.py')
         files = glob.glob(pattern)
         modules = [os.path.splitext(os.path.split(f)[1])[0] for f in files]
         modules = ['multiprocessing.' + m for m in modules]
@@ -5007,7 +5019,9 @@ class TestStartMethod(unittest.TestCase):
             self.assertEqual(methods, ['spawn'])
         else:
             self.assertTrue(methods == ['fork', 'spawn'] or
-                            methods == ['fork', 'spawn', 'forkserver'])
+                            methods == ['spawn', 'fork'] or
+                            methods == ['fork', 'spawn', 'forkserver'] or
+                            methods == ['spawn', 'fork', 'forkserver'])
 
     def test_preload_resources(self):
         if multiprocessing.get_start_method() != 'forkserver':

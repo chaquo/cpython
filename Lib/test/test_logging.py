@@ -1173,6 +1173,27 @@ class MemoryHandlerTest(BaseTest):
         # assert that no new lines have been added
         self.assert_log_lines(lines)  # no change
 
+    def test_race_between_set_target_and_flush(self):
+        class MockRaceConditionHandler:
+            def __init__(self, mem_hdlr):
+                self.mem_hdlr = mem_hdlr
+
+            def removeTarget(self):
+                self.mem_hdlr.setTarget(None)
+
+            def handle(self, msg):
+                t = threading.Thread(target=self.removeTarget)
+                t.daemon = True
+                t.start()
+
+        target = MockRaceConditionHandler(self.mem_hdlr)
+        self.mem_hdlr.setTarget(target)
+
+        for _ in range(10):
+            time.sleep(0.005)
+            self.mem_logger.info("not flushed")
+            self.mem_logger.warning("flushed")
+
 
 class ExceptionFormatter(logging.Formatter):
     """A special exception formatter."""
@@ -3621,9 +3642,9 @@ if hasattr(logging.handlers, 'QueueListener'):
 
         @patch.object(logging.handlers.QueueListener, 'handle')
         def test_handle_called_with_mp_queue(self, mock_handle):
-            # Issue 28668: The multiprocessing (mp) module is not functional
+            # bpo-28668: The multiprocessing (mp) module is not functional
             # when the mp.synchronize module cannot be imported.
-            support.import_module('multiprocessing.synchronize')
+            support.skip_if_broken_multiprocessing_synchronize()
             for i in range(self.repeat):
                 log_queue = multiprocessing.Queue()
                 self.setup_and_log(log_queue, '%s_%s' % (self.id(), i))
@@ -3647,9 +3668,9 @@ if hasattr(logging.handlers, 'QueueListener'):
             indicates that messages were not registered on the queue until
             _after_ the QueueListener stopped.
             """
-            # Issue 28668: The multiprocessing (mp) module is not functional
+            # bpo-28668: The multiprocessing (mp) module is not functional
             # when the mp.synchronize module cannot be imported.
-            support.import_module('multiprocessing.synchronize')
+            support.skip_if_broken_multiprocessing_synchronize()
             for i in range(self.repeat):
                 queue = multiprocessing.Queue()
                 self.setup_and_log(queue, '%s_%s' %(self.id(), i))

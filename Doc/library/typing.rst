@@ -324,7 +324,7 @@ every type as being compatible with :data:`Any` and :data:`Any` as being
 compatible with every type.
 
 This means that it is possible to perform any operation or method call on a
-value of type on :data:`Any` and assign it to any variable::
+value of type :data:`Any` and assign it to any variable::
 
    from typing import Any
 
@@ -672,7 +672,7 @@ The module defines the following classes, functions and decorators:
    A generic version of :class:`collections.abc.ByteString`.
 
    This type represents the types :class:`bytes`, :class:`bytearray`,
-   and :class:`memoryview`.
+   and :class:`memoryview` of byte sequences.
 
    As a shorthand for this type, :class:`bytes` can be used to
    annotate arguments of any of the types mentioned above.
@@ -733,7 +733,7 @@ The module defines the following classes, functions and decorators:
 
    .. versionadded:: 3.5.2
 
-.. class:: Coroutine(Awaitable[V_co], Generic[T_co T_contra, V_co])
+.. class:: Coroutine(Awaitable[V_co], Generic[T_co, T_contra, V_co])
 
    A generic version of :class:`collections.abc.Coroutine`.
    The variance and order of type variables
@@ -1020,9 +1020,9 @@ The module defines the following classes, functions and decorators:
    ``List[ForwardRef("SomeClass")]``.  This class should not be instantiated by
    a user, but may be used by introspection tools.
 
-.. function:: NewType(typ)
+.. function:: NewType(name, tp)
 
-   A helper function to indicate a distinct types to a typechecker,
+   A helper function to indicate a distinct type to a typechecker,
    see :ref:`distinct`. At runtime it returns a function that returns
    its argument. Usage::
 
