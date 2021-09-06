@@ -254,7 +254,8 @@ present, must be last; it matches any exception.  For an except clause with an
 expression, that expression is evaluated, and the clause matches the exception
 if the resulting object is "compatible" with the exception.  An object is
 compatible with an exception if it is the class or a base class of the exception
-object or a tuple containing an item compatible with the exception.
+object, or a tuple containing an item that is the class or a base class of
+the exception object.
 
 If no except clause matches the exception, the search for an exception handler
 continues in the surrounding code and on the invocation stack.  [#]_
@@ -581,19 +582,25 @@ e.g.::
        return penguin
 
 .. index::
+   single: / (slash); function definition
    single: * (asterisk); function definition
    single: **; function definition
 
 Function call semantics are described in more detail in section :ref:`calls`. A
 function call always assigns values to all parameters mentioned in the parameter
-list, either from position arguments, from keyword arguments, or from default
+list, either from positional arguments, from keyword arguments, or from default
 values.  If the form "``*identifier``" is present, it is initialized to a tuple
 receiving any excess positional parameters, defaulting to the empty tuple.
 If the form "``**identifier``" is present, it is initialized to a new
 ordered mapping receiving any excess keyword arguments, defaulting to a
 new empty mapping of the same type.  Parameters after "``*``" or
 "``*identifier``" are keyword-only parameters and may only be passed
-used keyword arguments.
+by keyword arguments.  Parameters before "``/``" are positional-only parameters
+and may only be passed by positional arguments.
+
+.. versionchanged:: 3.8
+   The ``/`` function parameter syntax may be used to indicate positional-only
+   parameters. See :pep:`570` for details.
 
 .. index::
    pair: function; annotations

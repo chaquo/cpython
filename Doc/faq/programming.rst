@@ -29,26 +29,26 @@ Python distribution (normally available as Tools/scripts/idle), includes a
 graphical debugger.
 
 PythonWin is a Python IDE that includes a GUI debugger based on pdb.  The
-Pythonwin debugger colors breakpoints and has quite a few cool features such as
-debugging non-Pythonwin programs.  Pythonwin is available as part of the `Python
-for Windows Extensions <https://sourceforge.net/projects/pywin32/>`__ project and
-as a part of the ActivePython distribution (see
-https://www.activestate.com/activepython\ ).
+PythonWin debugger colors breakpoints and has quite a few cool features such as
+debugging non-PythonWin programs.  PythonWin is available as part of
+`pywin32 <https://github.com/mhammond/pywin32>`_ project and
+as a part of the
+`ActivePython <https://www.activestate.com/products/python/>`_ distribution.
 
 `Eric <http://eric-ide.python-projects.org/>`_ is an IDE built on PyQt
 and the Scintilla editing component.
 
-Pydb is a version of the standard Python debugger pdb, modified for use with DDD
-(Data Display Debugger), a popular graphical debugger front end.  Pydb can be
-found at http://bashdb.sourceforge.net/pydb/ and DDD can be found at
-https://www.gnu.org/software/ddd.
+`trepan3k <https://github.com/rocky/python3-trepan/>`_ is a gdb-like debugger.
+
+`Visual Studio Code <https://code.visualstudio.com/>`_ is an IDE with debugging
+tools that integrates with version-control software.
 
 There are a number of commercial Python IDEs that include graphical debuggers.
 They include:
 
-* Wing IDE (https://wingware.com/)
-* Komodo IDE (https://komodoide.com/)
-* PyCharm (https://www.jetbrains.com/pycharm/)
+* `Wing IDE <https://wingware.com/>`_
+* `Komodo IDE <https://www.activestate.com/products/komodo-ide/>`_
+* `PyCharm <https://www.jetbrains.com/pycharm/>`_
 
 
 Are there tools to help find bugs or perform static analysis?
@@ -90,11 +90,12 @@ then compiles the generated C code and links it with the rest of the Python
 interpreter to form a self-contained binary which acts exactly like your script.
 
 Obviously, freeze requires a C compiler.  There are several other utilities
-which don't. One is Thomas Heller's py2exe (Windows only) at
+which don't:
 
-    http://www.py2exe.org/
-
-Another tool is Anthony Tuininga's `cx_Freeze <https://anthony-tuininga.github.io/cx_Freeze/>`_.
+* `py2exe <http://www.py2exe.org/>`_ for Windows binaries
+* `py2app <https://github.com/ronaldoussoren/py2app>`_ for Mac OS X binaries
+* `cx_Freeze <https://cx-freeze.readthedocs.io/en/latest/>`_ for cross-platform
+  binaries
 
 
 Are there coding standards or a style guide for Python programs?
@@ -1121,18 +1122,13 @@ trailing newline from a string.
 How do I iterate over a sequence in reverse order?
 --------------------------------------------------
 
-Use the :func:`reversed` built-in function, which is new in Python 2.4::
+Use the :func:`reversed` built-in function::
 
    for x in reversed(sequence):
        ...  # do something with x ...
 
 This won't touch your original sequence, but build a new copy with reversed
 order to iterate over.
-
-With Python 2.3, you can use an extended slice syntax::
-
-   for x in sequence[::-1]:
-       ...  # do something with x ...
 
 
 How do you remove duplicates from a list?
@@ -1161,6 +1157,21 @@ If all elements of the list may be used as set keys (i.e. they are all
 
 This converts the list into a set, thereby removing duplicates, and then back
 into a list.
+
+
+How do you remove multiple items from a list
+--------------------------------------------
+
+As with removing duplicates, explicitly iterating in reverse with a
+delete condition is one possibility.  However, it is easier and faster
+to use slice replacement with an implicit or explicit forward iteration.
+Here are three variations.::
+
+   mylist[:] = filter(keep_function, mylist)
+   mylist[:] = (x for x in mylist if keep_condition)
+   mylist[:] = [x for x in mylist if keep_condition]
+
+The list comprehension may be fastest.
 
 
 How do you make an array in Python?

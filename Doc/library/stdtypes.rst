@@ -478,7 +478,7 @@ class`. In addition, it provides a few more methods:
 
     .. versionadded:: 3.1
 
-.. method:: int.to_bytes(length, byteorder, \*, signed=False)
+.. method:: int.to_bytes(length, byteorder, *, signed=False)
 
     Return an array of bytes representing an integer.
 
@@ -510,7 +510,7 @@ class`. In addition, it provides a few more methods:
 
     .. versionadded:: 3.2
 
-.. classmethod:: int.from_bytes(bytes, byteorder, \*, signed=False)
+.. classmethod:: int.from_bytes(bytes, byteorder, *, signed=False)
 
     Return the integer represented by the given array of bytes.
 
@@ -3994,6 +3994,12 @@ The constructors for both classes work the same:
    objects.  If *iterable* is not specified, a new empty set is
    returned.
 
+   Sets can be created by several means:
+
+   * Use a comma-separated list of elements within braces: ``{'jack', 'sjoerd'}``
+   * Use a set comprehension: ``{c for c in 'abracadabra' if c not in 'abc'}``
+   * Use the type constructor: ``set()``, ``set('foobar')``, ``set(['a', 'b', 'foo'])``
+
    Instances of :class:`set` and :class:`frozenset` provide the following
    operations:
 
@@ -4185,6 +4191,14 @@ pairs within braces, for example: ``{'jack': 4098, 'sjoerd': 4127}`` or ``{4098:
 
    Return a new dictionary initialized from an optional positional argument
    and a possibly empty set of keyword arguments.
+
+   Dictionaries can be created by several means:
+
+   * Use a comma-separated list of ``key: value`` pairs within braces:
+     ``{'jack': 4098, 'sjoerd': 4127}`` or ``{4098: 'jack', 4127: 'sjoerd'}``
+   * Use a dict comprehension: ``{}``, ``{x: x ** 2 for x in range(10)}``
+   * Use the type constructor: ``dict()``,
+     ``dict([('foo', 100), ('bar', 200)])``, ``dict(foo=100, bar=200)``
 
    If no positional argument is given, an empty dictionary is created.
    If a positional argument is given and it is a mapping object, a dictionary
@@ -4693,6 +4707,9 @@ objects because they don't contain a reference to their global execution
 environment.  Code objects are returned by the built-in :func:`compile` function
 and can be extracted from function objects through their :attr:`__code__`
 attribute. See also the :mod:`code` module.
+
+Accessing ``__code__`` raises an :ref:`auditing event <auditing>`
+``object.__getattr__`` with arguments ``obj`` and ``"__code__"``.
 
 .. index::
    builtin: exec

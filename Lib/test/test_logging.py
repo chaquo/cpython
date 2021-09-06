@@ -836,6 +836,7 @@ class TestSMTPServer(smtpd.SMTPServer):
         self.port = self.socket.getsockname()[1]
         self._handler = handler
         self._thread = None
+        self._quit = False
         self.poll_interval = poll_interval
 
     def process_message(self, peer, mailfrom, rcpttos, data):
@@ -867,7 +868,8 @@ class TestSMTPServer(smtpd.SMTPServer):
                               :func:`select` or :func:`poll` call by
                               :func:`asyncore.loop`.
         """
-        asyncore.loop(poll_interval, map=self._map)
+        while not self._quit:
+            asyncore.loop(poll_interval, map=self._map, count=1)
 
     def stop(self, timeout=None):
         """
@@ -877,9 +879,10 @@ class TestSMTPServer(smtpd.SMTPServer):
         :param timeout: How long to wait for the server thread
                         to terminate.
         """
-        self.close()
+        self._quit = True
         support.join_thread(self._thread, timeout)
         self._thread = None
+        self.close()
         asyncore.close_all(map=self._map, ignore_all=True)
 
 
@@ -1177,22 +1180,27 @@ class MemoryHandlerTest(BaseTest):
         class MockRaceConditionHandler:
             def __init__(self, mem_hdlr):
                 self.mem_hdlr = mem_hdlr
+                self.threads = []
 
             def removeTarget(self):
                 self.mem_hdlr.setTarget(None)
 
             def handle(self, msg):
-                t = threading.Thread(target=self.removeTarget)
-                t.daemon = True
-                t.start()
+                thread = threading.Thread(target=self.removeTarget)
+                self.threads.append(thread)
+                thread.start()
 
         target = MockRaceConditionHandler(self.mem_hdlr)
-        self.mem_hdlr.setTarget(target)
+        try:
+            self.mem_hdlr.setTarget(target)
 
-        for _ in range(10):
-            time.sleep(0.005)
-            self.mem_logger.info("not flushed")
-            self.mem_logger.warning("flushed")
+            for _ in range(10):
+                time.sleep(0.005)
+                self.mem_logger.info("not flushed")
+                self.mem_logger.warning("flushed")
+        finally:
+            for thread in target.threads:
+                support.join_thread(thread)
 
 
 class ExceptionFormatter(logging.Formatter):
@@ -4164,6 +4172,15 @@ class ModuleLevelMiscTest(BaseTest):
 
         logging.disable(83)
         self.assertEqual(logging.root.manager.disable, 83)
+
+        self.assertRaises(ValueError, logging.disable, "doesnotexists")
+
+        class _NotAnIntOrString:
+            pass
+
+        self.assertRaises(TypeError, logging.disable, _NotAnIntOrString())
+
+        logging.disable("WARN")
 
         # test the default value introduced in 3.7
         # (Issue #28524)

@@ -954,6 +954,10 @@ call fails (for example because the path doesn't exist).
       >>> target.open().read()
       'some text'
 
+   The target path may be absolute or relative. Relative paths are interpreted
+   relative to the current working directory, *not* the directory of the Path
+   object.
+
    .. versionchanged:: 3.8
       Added return value, return the new Path instance.
 
@@ -963,6 +967,10 @@ call fails (for example because the path doesn't exist).
    Rename this file or directory to the given *target*, and return a new Path
    instance pointing to *target*.  If *target* points to an existing file or
    directory, it will be unconditionally replaced.
+
+   The target path may be absolute or relative. Relative paths are interpreted
+   relative to the current working directory, *not* the directory of the Path
+   object.
 
    .. versionchanged:: 3.8
       Added return value, return the new Path instance.
@@ -1055,6 +1063,20 @@ call fails (for example because the path doesn't exist).
       of :func:`os.symlink`'s.
 
 
+.. method:: Path.link_to(target)
+
+   Make *target* a hard link to this path.
+
+   .. warning::
+
+      This function does not make this path a hard link to *target*, despite
+      the implication of the function and argument names. The argument order
+      (target, link) is the reverse of :func:`Path.symlink_to`, but matches
+      that of :func:`os.link`.
+
+   .. versionadded:: 3.8
+
+
 .. method:: Path.touch(mode=0o666, exist_ok=True)
 
    Create a file at this given path.  If *mode* is given, it is combined
@@ -1077,13 +1099,6 @@ call fails (for example because the path doesn't exist).
 
    .. versionchanged:: 3.8
       The *missing_ok* parameter was added.
-
-
-.. method:: Path.link_to(target)
-
-   Create a hard link pointing to a path named *target*.
-
-   .. versionadded:: 3.8
 
 
 .. method:: Path.write_bytes(data)

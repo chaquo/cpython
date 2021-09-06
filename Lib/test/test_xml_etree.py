@@ -314,6 +314,9 @@ class ElementTreeTest(unittest.TestCase):
         elem.extend([e])
         self.serialize_check(elem, '<body><tag /><tag2 /></body>')
         elem.remove(e)
+        elem.extend(iter([e]))
+        self.serialize_check(elem, '<body><tag /><tag2 /></body>')
+        elem.remove(e)
 
         element = ET.Element("tag", key="value")
         self.serialize_check(element, '<tag key="value" />') # 1
@@ -3700,6 +3703,14 @@ class C14NTest(unittest.TestCase):
         # fragments from PJ's tests
         #self.assertEqual(c14n_roundtrip("<doc xmlns:x='http://example.com/x' xmlns='http://example.com/default'><b y:a1='1' xmlns='http://example.com/default' a3='3' xmlns:y='http://example.com/y' y:a2='2'/></doc>"),
         #'<doc xmlns:x="http://example.com/x"><b xmlns:y="http://example.com/y" a3="3" y:a1="1" y:a2="2"></b></doc>')
+
+        # Namespace issues
+        xml = '<X xmlns="http://nps/a"><Y targets="abc,xyz"></Y></X>'
+        self.assertEqual(c14n_roundtrip(xml), xml)
+        xml = '<X xmlns="http://nps/a"><Y xmlns="http://nsp/b" targets="abc,xyz"></Y></X>'
+        self.assertEqual(c14n_roundtrip(xml), xml)
+        xml = '<X xmlns="http://nps/a"><Y xmlns:b="http://nsp/b" b:targets="abc,xyz"></Y></X>'
+        self.assertEqual(c14n_roundtrip(xml), xml)
 
     def test_c14n_exclusion(self):
         xml = textwrap.dedent("""\

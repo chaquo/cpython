@@ -151,8 +151,8 @@ are always available.  They are listed here in alphabetical order.
    * If it is an *integer*, the array will have that size and will be
      initialized with null bytes.
 
-   * If it is an object conforming to the *buffer* interface, a read-only buffer
-     of the object will be used to initialize the bytes array.
+   * If it is an object conforming to the :ref:`buffer interface <bufferobjects>`,
+     a read-only buffer of the object will be used to initialize the bytes array.
 
    * If it is an *iterable*, it must be an iterable of integers in the range
      ``0 <= x < 256``, which are used as the initial contents of the array.
@@ -509,7 +509,8 @@ are always available.  They are listed here in alphabetical order.
    occurs). [#]_ If it is a code object, it is simply executed.  In all cases,
    the code that's executed is expected to be valid as file input (see the
    section "File input" in the Reference Manual). Be aware that the
-   :keyword:`return` and :keyword:`yield` statements may not be used outside of
+   :keyword:`nonlocal`, :keyword:`yield`,  and :keyword:`return`
+   statements may not be used outside of
    function definitions even within the context of code passed to the
    :func:`exec` function. The return value is ``None``.
 
@@ -766,6 +767,8 @@ are always available.  They are listed here in alphabetical order.
    value.
 
    .. impl-detail:: This is the address of the object in memory.
+
+   .. audit-event:: builtins.id id id
 
 
 .. function:: input([prompt])
@@ -1624,7 +1627,7 @@ are always available.  They are listed here in alphabetical order.
    not found in statically compiled languages or languages that only support
    single inheritance.  This makes it possible to implement "diamond diagrams"
    where multiple base classes implement the same method.  Good design dictates
-   that this method have the same calling signature in every case (because the
+   that such implementations have the same calling signature in every case (because the
    order of calls is determined at runtime, because that order adapts
    to changes in the class hierarchy, and because that order can include
    sibling classes that are unknown prior to runtime).
@@ -1668,7 +1671,7 @@ are always available.  They are listed here in alphabetical order.
 
 
 .. class:: type(object)
-           type(name, bases, dict)
+           type(name, bases, dict, **kwds)
 
    .. index:: object: type
 
@@ -1681,20 +1684,28 @@ are always available.  They are listed here in alphabetical order.
 
 
    With three arguments, return a new type object.  This is essentially a
-   dynamic form of the :keyword:`class` statement. The *name* string is the
-   class name and becomes the :attr:`~definition.__name__` attribute; the *bases*
-   tuple itemizes the base classes and becomes the :attr:`~class.__bases__`
-   attribute; and the *dict* dictionary is the namespace containing definitions
-   for class body and is copied to a standard dictionary to become the
-   :attr:`~object.__dict__` attribute.  For example, the following two
-   statements create identical :class:`type` objects:
+   dynamic form of the :keyword:`class` statement. The *name* string is
+   the class name and becomes the :attr:`~definition.__name__` attribute.
+   The *bases* tuple contains the base classes and becomes the
+   :attr:`~class.__bases__` attribute; if empty, :class:`object`, the
+   ultimate base of all classes, is added.  The *dict* dictionary contains
+   attribute and method definitions for the class body; it may be copied
+   or wrapped before becoming the :attr:`~object.__dict__` attribute.
+   The following two statements create identical :class:`type` objects:
 
       >>> class X:
       ...     a = 1
       ...
-      >>> X = type('X', (object,), dict(a=1))
+      >>> X = type('X', (), dict(a=1))
 
    See also :ref:`bltin-type-objects`.
+
+   Keyword arguments provided to the three argument form are passed to the
+   appropriate metaclass machinery (usually :meth:`~object.__init_subclass__`)
+   in the same way that keywords in a class
+   definition (besides *metaclass*) would.
+
+   See also :ref:`class-customization`.
 
    .. versionchanged:: 3.6
       Subclasses of :class:`type` which don't override ``type.__new__`` may no
